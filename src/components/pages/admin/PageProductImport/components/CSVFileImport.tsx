@@ -30,9 +30,15 @@ export default function CSVFileImport({url, title}: CSVFileImportProps) {
   };
 
   const uploadFile = async (e: any) => {
-      // Get the presigned URL
+    const token = localStorage.getItem("authorization_token")
+    const Authorization = token && `Basic ${token}`
+
+    try {
       const response = await axios({
         method: 'GET',
+        headers: {
+          ...(Authorization ? { Authorization } : {}),
+        },
         url,
         params: {
           name: encodeURIComponent(file.name)
@@ -46,8 +52,22 @@ export default function CSVFileImport({url, title}: CSVFileImportProps) {
       })
       console.log('Result: ', result)
       setFile('');
+    } catch (error) {
+      console.log(`error`, error)
+      switch (error.status) {
+        case 403:
+          alert("You are forbidden to upload this file")
+          break
+
+        case 401:
+          alert("You are not authorized to upload this file")
+          break
+
+        default:
+          break
+      }
     }
-  ;
+  }
 
   return (
     <div className={classes.content}>
